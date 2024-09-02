@@ -1,0 +1,57 @@
+pipeline {
+    agent any
+
+    environment {
+        DOTNET_ROOT = tool name: 'dotnet', type: 'DotNetCoreSdkInstaller'
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                // Pulling the code from GitHub
+                git branch: 'master', url: 'https://github.com/Anup-rajendra/SampleSolution.git'
+            }
+        }
+
+        stage('Build') {
+            steps {
+                // Building the solution
+                script {
+                    def slnFile = findFiles(glob: '/*.sln')[0]
+                    sh "${DOTNET_ROOT}/dotnet build ${slnFile} --configuration Release"
+                }
+            }
+        }
+
+        stage('Test') {
+            steps {
+                // Running tests using NUnit
+                script {
+                    def testProjects = findFiles(glob: '/Tests/.csproj')
+            for (def project in testProjects) {
+              sh "${DOTNET_ROOT}/dotnet test ${project} --no-build --verbosity normal"
+                    }
+                }
+            }
+        }
+      stage('Deploy') {
+            steps {
+                // Placeholder for deployment steps
+                echo 'Deploying application...'
+                // Example: Publish to a folder
+                sh "${DOTNET_ROOT}/dotnet publish -c Release -o /path/to/deploy"
+            }
+        }
+    }
+
+    post {
+        always {
+            // Archive test results, if any
+            junit '/TestResults/*.xml'
+        }
+        failure {
+            // Additional steps if build fails
+            echo 'Build failed!'
+        }
+    }
+}
