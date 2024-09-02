@@ -1,58 +1,70 @@
 pipeline {
     agent any
 
-    environment {
-        DOTNET_ROOT = tool name: 'Dotnet', type: 'DotNetCoreSdkInstaller'
+    tools {
+        dotnetsdk 'Dotnet'  // Use the name you gave the .NET SDK in Global Tool Configuration
     }
 
     stages {
         stage('Checkout') {
             steps {
-                // Pulling the code from GitHub
-                git branch: 'master', url: 'https://github.com/Anup-rajendra/SampleSolution'
+                checkout scm
             }
         }
-
-        stage('Build') {
+        stage('Check NuGet Sources') {
             steps {
-                // Building the solution
                 script {
-                    def slnFile = findFiles(glob: '/*.sln')[0]
-                    sh "${DOTNET_ROOT}/dotnet build ${slnFile} --configuration Release"
+                    bat 'dotnet nuget list source'
                 }
             }
         }
-
-        stage('Test') {
+        stage('Configure NuGet Source') {
             steps {
-                // Running tests using NUnit
                 script {
-                    def testProjects = findFiles(glob: '/Tests/*.csproj')
-                    for (def project in testProjects) {
-                        sh "${DOTNET_ROOT}/dotnet test ${project} --no-build --verbosity normal"
+                    def output = bat(script: 'dotnet nuget list source', returnStdout: true).trim()
+                    if (!output.contains('https://api.nuget.org/v3/index.json')) {
+                        bat 'dotnet nuget add source https://api.nuget.org/v3/index.json -n nuget.org'
+                    } else {
+                        echo 'NuGet source already exists.'
                     }
                 }
             }
         }
-
+        stage('Restore') {
+            steps {
+                script {
+                    bat 'dotnet restore MyApp/MyApp.csproj'
+                }
+            }
+        }
+        stage('Build') {
+            steps {
+                script {
+                    bat 'dotnet build MyApp/MyApp.csproj'
+                }
+            }
+        }
+        stage('Test') {
+            steps {
+                script {
+                    bat 'dotnet test MyApp.Tests/MyApp.Tests.csproj --logger "trx;LogFileName=TestResults/test_results.trx"'
+                }
+            }
+        }
+        stage('List Test Results') {
+            steps {
+                script {
+                    bat 'dir "MyApp.Tests\\TestResults"'
+                }
+            }
+        }
         stage('Deploy') {
             steps {
-                // Placeholder for deployment steps
                 echo 'Deploying application...'
-                // Example: Publish to a folder
-                sh "${DOTNET_ROOT}/dotnet publish -c Release -o /path/to/deploy"
+                // Deployment steps go here
             }
         }
     }
 
-    post {
-        always {
-            // Archive test results, if any
-            junit '/TestResults/*.xml'
-        }
-        failure {
-            // Additional steps if build fails
-            echo 'Build failed!'
-        }
-    }
+    
 }
