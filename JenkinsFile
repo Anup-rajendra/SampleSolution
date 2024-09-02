@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        DOTNET_ROOT = tool name: 'dotnet', type: 'DotNetCoreSdkInstaller'
+        DOTNET_ROOT = tool name: 'Dotnet', type: 'DotNetCoreSdkInstaller'
     }
 
     stages {
