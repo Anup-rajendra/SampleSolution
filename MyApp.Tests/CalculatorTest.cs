@@ -14,7 +14,13 @@ namespace MyApp.Tests
             Calculator calculator = new Calculator();
             int result = calculator.Add(2, 3);
             Assert.AreEqual(5, result);
-
+        }
+        [Test]
+        public void Add_Test2()
+        {
+            Calculator calculator = new Calculator();
+            int result = calculator.Add(5, 3);
+            Assert.AreEqual(5, result);
         }
     }
 }
