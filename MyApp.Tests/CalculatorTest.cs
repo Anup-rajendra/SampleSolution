@@ -20,7 +20,7 @@ namespace MyApp.Tests
         {
             Calculator calculator = new Calculator();
             int result = calculator.Add(5, 3);
-            Assert.AreEqual(5, result);
+            Assert.AreEqual(8, result);
         }
     }
 }
