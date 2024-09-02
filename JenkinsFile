@@ -27,14 +27,15 @@ pipeline {
             steps {
                 // Running tests using NUnit
                 script {
-                    def testProjects = findFiles(glob: '/Tests/.csproj')
-            for (def project in testProjects) {
-              sh "${DOTNET_ROOT}/dotnet test ${project} --no-build --verbosity normal"
+                    def testProjects = findFiles(glob: '/Tests/*.csproj')
+                    for (def project in testProjects) {
+                        sh "${DOTNET_ROOT}/dotnet test ${project} --no-build --verbosity normal"
                     }
                 }
             }
         }
-      stage('Deploy') {
+
+        stage('Deploy') {
             steps {
                 // Placeholder for deployment steps
                 echo 'Deploying application...'
@@ -52,6 +53,6 @@ pipeline {
         failure {
             // Additional steps if build fails
             echo 'Build failed!'
-        }
-    }
+        }
+    }
 }
