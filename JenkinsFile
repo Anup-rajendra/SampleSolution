@@ -9,7 +9,7 @@ pipeline {
         stage('Checkout') {
             steps {
                 // Pulling the code from GitHub
-                git branch: 'master', url: 'https://github.com/Anup-rajendra/SampleSolution.git'
+                git branch: 'master', url: 'https://github.com/Anup-rajendra/SampleSolution'
             }
         }
 
